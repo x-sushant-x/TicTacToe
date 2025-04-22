@@ -13,6 +13,8 @@ func NewTicTacToeBoard() TicTacToeBoard {
 }
 
 func (b TicTacToeBoard) Display() {
+	fmt.Println()
+
 	for i := range 3 {
 		for j := range 3 {
 			cell := b.Grid[i][j]
@@ -34,4 +36,6 @@ func (b TicTacToeBoard) Display() {
 			fmt.Println("---+---+---")
 		}
 	}
+
+	fmt.Println()
 }

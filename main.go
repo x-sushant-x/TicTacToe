@@ -1,6 +1,7 @@
 package main
 
 func main() {
-	ui := NewTicTacToeBoard()
-	ui.Display()
+	gameManager := NewGameManager()
+
+	gameManager.StartGame()
 }
