@@ -48,7 +48,8 @@ func NewGameManager(lobby *Lobby) *GameManager {
 	}
 }
 
-func (m *GameManager) StartGame() {
+// This bool is to tell main function that users wants to go back to lobby.
+func (m *GameManager) StartGame() bool {
 	ClearTerminal()
 	fmt.Printf("🚀 Match Starting: %s 🆚 %s\n", m.playerOne.Username, m.playerTwo.Username)
 
@@ -75,8 +76,10 @@ func (m *GameManager) StartGame() {
 	if nextAction == "1" {
 		m.StartGame()
 	} else if nextAction == "2" {
-		m.lobby.ShowLobby()
+		return true
 	}
+
+	return false
 }
 
 func (m *GameManager) takeInput() error {
@@ -108,7 +111,6 @@ func (m *GameManager) checkWinningCondition() bool {
 
 	if result.Draw {
 		fmt.Println("🤝 It's a draw!")
-		m.lobby.ShowLobby()
 		return true
 	}
 

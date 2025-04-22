@@ -14,7 +14,9 @@ func main() {
 		switch choice {
 		case "1":
 			gameManager := NewGameManager(lobby)
-			gameManager.StartGame()
+			if gameManager.StartGame() {
+				continue
+			}
 		case "2":
 			fmt.Println("Showing Leaderboard")
 		case "3":
