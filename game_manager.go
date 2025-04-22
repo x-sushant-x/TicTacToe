@@ -1,7 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"slices"
 	"strconv"
 )
 
@@ -10,6 +13,9 @@ type GameMode int
 const (
 	SINGLE_PLAYER GameMode = iota
 	MULTIPLAYER
+
+	PlayerOneMove = "O"
+	PlayerTwoMove = "X"
 )
 
 type GameManager struct {
@@ -48,34 +54,86 @@ func (m *GameManager) StartGame() {
 	m.board.Display()
 
 	for {
-		m.TakeInput()
+		err := m.takeInput()
 		m.board.Display()
 
-		if m.turn == m.playerOne {
-			m.turn = m.playerTwo
-		} else {
-			m.turn = m.playerOne
+		if err == nil {
+			if m.turn == m.playerOne {
+				m.turn = m.playerTwo
+			} else {
+				m.turn = m.playerOne
+			}
 		}
+
+		m.checkWinningCondition()
 	}
 }
 
-func (m *GameManager) TakeInput() {
+func (m *GameManager) takeInput() error {
 	fmt.Println("Current Turn: " + m.turn.Username)
 
-	fmt.Println("Valid Moves:", m.board.GetValidMoves())
+	validMoves := m.board.GetValidMoves()
+
+	fmt.Println("Valid Moves:", validMoves)
 	input := ShowInputPrompt("Enter your move: ")
 
 	i, err := strconv.Atoi(input)
+	err = checkValidMove(err, validMoves, i)
+
 	if err != nil {
-		fmt.Println("❌ Invalid Input")
-		return
+		return err
 	}
 
 	if m.turn == m.playerOne {
-		m.board.Mark(i, "O")
+		m.board.Mark(i, PlayerOneMove)
 	} else {
-		m.board.Mark(i, "X")
+		m.board.Mark(i, PlayerTwoMove)
+	}
+
+	return nil
+}
+
+func (m *GameManager) checkWinningCondition() {
+	result := m.board.CheckWin()
+
+	if result.Draw {
+		fmt.Println("🤝 It's a draw!")
+		os.Exit(0)
+	}
+
+	if result.Win {
+		winner := result.Winner
+
+		if winner == "O" {
+			fmt.Printf("🏆 %s wins!!!\n", m.playerOne.Username)
+		} else {
+			fmt.Printf("🏆 %s wins!!!\n", m.playerTwo.Username)
+		}
+
+		os.Exit(0)
 	}
 }
 
-func (m *GameManager) CheckWinningCondition() {}
+func checkValidMove(err error, validMoves []int, i int) error {
+	if err != nil {
+		fmt.Println("❌ Invalid Input")
+		return errors.New("invalid input")
+	}
+
+	valid := slices.Contains(validMoves, i)
+
+	if !valid {
+		fmt.Println("❌ Invalid Move")
+		return errors.New("invalid move")
+	}
+
+	return nil
+}
+
+func (m *GameManager) switchTurn() {
+	if m.turn == m.playerOne {
+		m.turn = m.playerTwo
+	} else {
+		m.turn = m.playerOne
+	}
+}

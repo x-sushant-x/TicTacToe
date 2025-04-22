@@ -89,3 +89,67 @@ func (b *TicTacToeBoard) GetValidMoves() []int {
 
 	return validMovies
 }
+
+type Result struct {
+	Win      bool
+	Draw     bool
+	Winner   string
+	Continue bool
+}
+
+func createResult(win bool, draw bool, winner string, Continue bool) Result {
+	return Result{
+		Win:      win,
+		Draw:     draw,
+		Winner:   winner,
+		Continue: Continue,
+	}
+}
+
+func (board *TicTacToeBoard) CheckWin() Result {
+	var result Result
+
+	winningLines := [][3][2]int{
+		{{0, 0}, {0, 1}, {0, 2}},
+		{{1, 0}, {1, 1}, {1, 2}},
+		{{2, 0}, {2, 1}, {2, 2}},
+
+		{{0, 0}, {1, 0}, {2, 0}},
+		{{0, 1}, {1, 1}, {2, 1}},
+		{{0, 2}, {1, 2}, {2, 2}},
+
+		{{0, 0}, {1, 1}, {2, 2}},
+		{{0, 2}, {1, 1}, {2, 0}},
+	}
+
+	for _, line := range winningLines {
+		a, b, c := line[0], line[1], line[2]
+
+		if board.Grid[a[0]][a[1]] != "" &&
+			board.Grid[a[0]][a[1]] == board.Grid[b[0]][b[1]] &&
+			board.Grid[a[0]][a[1]] == board.Grid[c[0]][c[1]] {
+
+			if board.Grid[a[0]][a[1]] == "O" {
+				result = createResult(true, false, "O", false)
+			} else {
+				result = createResult(true, false, "X", false)
+			}
+		}
+	}
+
+	isDraw := true
+	for i := range 3 {
+		for j := range 3 {
+			if board.Grid[i][j] == "" {
+				isDraw = false
+				break
+			}
+		}
+	}
+
+	if isDraw {
+		return createResult(false, true, "", false)
+	}
+
+	return result
+}
