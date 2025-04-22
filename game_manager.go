@@ -3,15 +3,17 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"slices"
 	"strconv"
+	"time"
 )
 
 type GameMode int
 
 const (
-	SINGLE_PLAYER GameMode = iota
-	MULTIPLAYER
+	SinglePlayer GameMode = iota
+	Multiplayer
 
 	PlayerOneMove = "O"
 	PlayerTwoMove = "X"
@@ -27,9 +29,13 @@ type GameManager struct {
 	leaderboard *Leaderboard
 }
 
-func NewGameManager(lobby *Lobby, leaderboard *Leaderboard) *GameManager {
+func NewGameManager(lobby *Lobby, leaderboard *Leaderboard, mode GameMode) *GameManager {
 	playerOneName := ShowInputPrompt("Enter Player 1 Name: ")
-	playerTwoName := ShowInputPrompt("Enter Player 2 Name: ")
+	playerTwoName := "Bot"
+
+	if mode == Multiplayer {
+		playerTwoName = ShowInputPrompt("Enter Player 2 Name: ")
+	}
 
 	playerOne := Player{
 		Username: playerOneName,
@@ -40,7 +46,7 @@ func NewGameManager(lobby *Lobby, leaderboard *Leaderboard) *GameManager {
 	}
 
 	return &GameManager{
-		gameMode:    MULTIPLAYER,
+		gameMode:    mode,
 		playerOne:   &playerOne,
 		playerTwo:   &playerTwo,
 		board:       NewTicTacToeBoard(),
@@ -50,7 +56,6 @@ func NewGameManager(lobby *Lobby, leaderboard *Leaderboard) *GameManager {
 	}
 }
 
-// This bool is to tell main function that users wants to go back to lobby.
 func (m *GameManager) StartGame() bool {
 	ClearTerminal()
 	fmt.Printf("🚀 Match Starting: %s 🆚 %s\n", m.playerOne.Username, m.playerTwo.Username)
@@ -86,23 +91,30 @@ func (m *GameManager) StartGame() bool {
 
 func (m *GameManager) takeInput() error {
 	fmt.Println("Current Turn: " + m.turn.Username)
-
 	validMoves := m.board.GetValidMoves()
-
 	fmt.Println("Valid Moves:", validMoves)
-	input := ShowInputPrompt("Enter your move: ")
 
-	i, err := strconv.Atoi(input)
-	err = checkValidMove(err, validMoves, i)
+	var move int
+	var err error
 
-	if err != nil {
-		return err
+	if m.gameMode == SinglePlayer && m.turn == m.playerTwo {
+		time.Sleep(time.Second * 1)
+		move = validMoves[rand.Intn(len(validMoves))]
+		fmt.Printf("🤖 Bot choose move: %d\n", move)
+	} else {
+		input := ShowInputPrompt("Enter your move: ")
+		move, err = strconv.Atoi(input)
+		err = checkValidMove(err, validMoves, move)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	if m.turn == m.playerOne {
-		m.board.Mark(i, PlayerOneMove)
+		m.board.Mark(move, PlayerOneMove)
 	} else {
-		m.board.Mark(i, PlayerTwoMove)
+		m.board.Mark(move, PlayerTwoMove)
 	}
 
 	return nil

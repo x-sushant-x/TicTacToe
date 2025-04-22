@@ -16,8 +16,9 @@ func (l *Lobby) ShowLobby() string {
 	fmt.Printf("🎯 Welcome To Tic Tac Toe 🎯\n")
 
 	fmt.Println("1. Start Game")
-	fmt.Println("2. Show Leaderboard")
-	fmt.Println("3. Exit")
+	fmt.Println("2. Start Game With Bot")
+	fmt.Println("3. Show Leaderboard")
+	fmt.Println("4. Exit")
 
 	var input string
 
