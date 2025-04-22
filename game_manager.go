@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type GameMode int
 
@@ -11,13 +14,13 @@ const (
 
 type GameManager struct {
 	gameMode  GameMode
-	playerOne Player
-	playerTwo Player
-	board     TicTacToeBoard
-	turn      Player
+	playerOne *Player
+	playerTwo *Player
+	board     *TicTacToeBoard
+	turn      *Player
 }
 
-func NewGameManager() GameManager {
+func NewGameManager() *GameManager {
 	playerOneName := ShowInputPrompt("Enter Player 1 Name: ")
 	playerTwoName := ShowInputPrompt("Enter Player 2 Name: ")
 
@@ -29,16 +32,16 @@ func NewGameManager() GameManager {
 		Username: playerTwoName,
 	}
 
-	return GameManager{
+	return &GameManager{
 		gameMode:  MULTIPLAYER,
-		playerOne: playerOne,
-		playerTwo: playerTwo,
+		playerOne: &playerOne,
+		playerTwo: &playerTwo,
 		board:     NewTicTacToeBoard(),
-		turn:      playerOne,
+		turn:      &playerOne,
 	}
 }
 
-func (m GameManager) StartGame() {
+func (m *GameManager) StartGame() {
 	ClearTerminal()
 	fmt.Printf("🚀 Match Starting: %s 🆚 %s\n", m.playerOne.Username, m.playerTwo.Username)
 
@@ -46,11 +49,33 @@ func (m GameManager) StartGame() {
 
 	for {
 		m.TakeInput()
+		m.board.Display()
+
+		if m.turn == m.playerOne {
+			m.turn = m.playerTwo
+		} else {
+			m.turn = m.playerOne
+		}
 	}
 }
 
-func (m GameManager) TakeInput() {
-	ShowInputPrompt("Current Turn: " + m.turn.Username)
+func (m *GameManager) TakeInput() {
+	fmt.Println("Current Turn: " + m.turn.Username)
+
+	fmt.Println("Valid Moves:", m.board.GetValidMoves())
+	input := ShowInputPrompt("Enter your move: ")
+
+	i, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println("❌ Invalid Input")
+		return
+	}
+
+	if m.turn == m.playerOne {
+		m.board.Mark(i, "O")
+	} else {
+		m.board.Mark(i, "X")
+	}
 }
 
-func (m GameManager) CheckWinningCondition() {}
+func (m *GameManager) CheckWinningCondition() {}
