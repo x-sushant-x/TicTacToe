@@ -18,15 +18,16 @@ const (
 )
 
 type GameManager struct {
-	gameMode  GameMode
-	playerOne *Player
-	playerTwo *Player
-	board     *TicTacToeBoard
-	turn      *Player
-	lobby     *Lobby
+	gameMode    GameMode
+	playerOne   *Player
+	playerTwo   *Player
+	board       *TicTacToeBoard
+	turn        *Player
+	lobby       *Lobby
+	leaderboard *Leaderboard
 }
 
-func NewGameManager(lobby *Lobby) *GameManager {
+func NewGameManager(lobby *Lobby, leaderboard *Leaderboard) *GameManager {
 	playerOneName := ShowInputPrompt("Enter Player 1 Name: ")
 	playerTwoName := ShowInputPrompt("Enter Player 2 Name: ")
 
@@ -39,12 +40,13 @@ func NewGameManager(lobby *Lobby) *GameManager {
 	}
 
 	return &GameManager{
-		gameMode:  MULTIPLAYER,
-		playerOne: &playerOne,
-		playerTwo: &playerTwo,
-		board:     NewTicTacToeBoard(),
-		turn:      &playerOne,
-		lobby:     lobby,
+		gameMode:    MULTIPLAYER,
+		playerOne:   &playerOne,
+		playerTwo:   &playerTwo,
+		board:       NewTicTacToeBoard(),
+		turn:        &playerOne,
+		lobby:       lobby,
+		leaderboard: leaderboard,
 	}
 }
 
@@ -118,8 +120,10 @@ func (m *GameManager) checkWinningCondition() bool {
 		winner := result.Winner
 
 		if winner == "O" {
+			m.leaderboard.Update(m.playerOne.Username, "W")
 			fmt.Printf("🏆 %s wins!!!\n\n", m.playerOne.Username)
 		} else {
+			m.leaderboard.Update(m.playerTwo.Username, "W")
 			fmt.Printf("🏆 %s wins!!!\n\n", m.playerTwo.Username)
 		}
 
