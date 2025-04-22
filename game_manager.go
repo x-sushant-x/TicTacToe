@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 	"slices"
 	"strconv"
 )
@@ -24,9 +23,10 @@ type GameManager struct {
 	playerTwo *Player
 	board     *TicTacToeBoard
 	turn      *Player
+	lobby     *Lobby
 }
 
-func NewGameManager() *GameManager {
+func NewGameManager(lobby *Lobby) *GameManager {
 	playerOneName := ShowInputPrompt("Enter Player 1 Name: ")
 	playerTwoName := ShowInputPrompt("Enter Player 2 Name: ")
 
@@ -44,6 +44,7 @@ func NewGameManager() *GameManager {
 		playerTwo: &playerTwo,
 		board:     NewTicTacToeBoard(),
 		turn:      &playerOne,
+		lobby:     lobby,
 	}
 }
 
@@ -51,6 +52,7 @@ func (m *GameManager) StartGame() {
 	ClearTerminal()
 	fmt.Printf("🚀 Match Starting: %s 🆚 %s\n", m.playerOne.Username, m.playerTwo.Username)
 
+	m.board.Reset()
 	m.board.Display()
 
 	for {
@@ -58,14 +60,22 @@ func (m *GameManager) StartGame() {
 		m.board.Display()
 
 		if err == nil {
-			if m.turn == m.playerOne {
-				m.turn = m.playerTwo
-			} else {
-				m.turn = m.playerOne
-			}
+			m.switchTurn()
 		}
 
-		m.checkWinningCondition()
+		isWinOrDraw := m.checkWinningCondition()
+
+		if isWinOrDraw {
+			break
+		}
+	}
+
+	nextAction := ShowInputPrompt("Game Over! Press 1 to Restart Game or 2 to go to the Lobby: ")
+
+	if nextAction == "1" {
+		m.StartGame()
+	} else if nextAction == "2" {
+		m.lobby.ShowLobby()
 	}
 }
 
@@ -93,25 +103,28 @@ func (m *GameManager) takeInput() error {
 	return nil
 }
 
-func (m *GameManager) checkWinningCondition() {
+func (m *GameManager) checkWinningCondition() bool {
 	result := m.board.CheckWin()
 
 	if result.Draw {
 		fmt.Println("🤝 It's a draw!")
-		os.Exit(0)
+		m.lobby.ShowLobby()
+		return true
 	}
 
 	if result.Win {
 		winner := result.Winner
 
 		if winner == "O" {
-			fmt.Printf("🏆 %s wins!!!\n", m.playerOne.Username)
+			fmt.Printf("🏆 %s wins!!!\n\n", m.playerOne.Username)
 		} else {
-			fmt.Printf("🏆 %s wins!!!\n", m.playerTwo.Username)
+			fmt.Printf("🏆 %s wins!!!\n\n", m.playerTwo.Username)
 		}
 
-		os.Exit(0)
+		return true
 	}
+
+	return false
 }
 
 func checkValidMove(err error, validMoves []int, i int) error {

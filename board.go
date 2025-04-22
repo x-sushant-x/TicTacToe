@@ -153,3 +153,16 @@ func (board *TicTacToeBoard) CheckWin() Result {
 
 	return result
 }
+
+func (board *TicTacToeBoard) Reset() {
+	for i := range board.Grid {
+		for j := range board.Grid[i] {
+			board.Grid[i][j] = ""
+		}
+	}
+
+	for k, v := range board.mapping {
+		v.isUsed = false
+		board.mapping[k] = v
+	}
+}
