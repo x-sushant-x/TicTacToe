@@ -6,6 +6,6 @@
 2. Run `make run` command and that's it.
 
 ### Run Without Make?
-1. If you are on windows run `windows.exe` from project root folder.
+1. If you are on windows run `main.exe` from project root folder.
 2. If you are on unix based OS run `./main`.
 3. If you have have Golang installed in your system run `go run main.go`
